@@ -237,7 +237,9 @@ class _DashboardScreenState
       context,
       MaterialPageRoute(
         builder: (_) => ProfileSettingsScreen(
-          payments: subscriptionPayments, userName: '', userEmail: '',
+          payments: subscriptionPayments,
+          userName: '',
+          userEmail: '',
         ),
       ),
     );
@@ -286,7 +288,6 @@ class _DashboardScreenState
     return Scaffold(
       backgroundColor:
       const Color(0xFFF7F8FC),
-
       body: SafeArea(
         child: LayoutBuilder(
           builder:
@@ -483,8 +484,7 @@ class _DashboardScreenState
                                       const TextStyle(
                                         color:
                                         Colors.white,
-                                        fontSize:
-                                        26,
+                                        fontSize: 26,
                                         fontWeight:
                                         FontWeight.w700,
                                       ),
@@ -666,120 +666,143 @@ class _DashboardScreenState
                 ),
 
                 // ==================================================
-                // BOTTOM BAR
+                // BOTTOM BAR + PLUS BUTTON
                 // ==================================================
 
-                Stack(
-                  clipBehavior:
-                  Clip.none,
-                  children: [
-                    Container(
-                      height: 50,
-                      decoration:
-                      const BoxDecoration(
-                        color:
-                        Colors.white,
-                        border:
-                        Border(
-                          top:
-                          BorderSide(
-                            color:
-                            Color(
-                              0xFFE2E2E2,
-                            ),
-                          ),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          _bottomItem(
-                            Icons
-                                .home_rounded,
-                            'Home',
-                            0,
-                          ),
+                SizedBox(
+                  height: 110,
+                  child: Stack(
+                    clipBehavior:
+                    Clip.none,
+                    children: [
+                      // ==========================================
+                      // BOTTOM NAVIGATION BAR
+                      // ==========================================
 
-                          _bottomItem(
-                            Icons
-                                .subscriptions_rounded,
-                            'Subscriptions',
-                            1,
-                          ),
-
-                          // SPACE FOR PLUS
-                          const Expanded(
-                            child:
-                            SizedBox(),
-                          ),
-
-                          _bottomItem(
-                            Icons
-                                .history_rounded,
-                            'History',
-                            2,
-                          ),
-
-                          _bottomItem(
-                            Icons
-                                .person_outline_rounded,
-                            'Profile',
-                            3,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // =================================================
-                    // PLUS BUTTON — RIGHT SIDE
-                    // =================================================
-
-                    Positioned(
-                      right: 28,
-                      top: -60,
-                      child:
-                      Container(
-                        width: 56,
-                        height: 56,
-                        padding:
-                        const EdgeInsets
-                            .all(
-                          3,
-                        ),
-                        decoration:
-                        const BoxDecoration(
-                          color:
-                          Colors.white,
-                          shape:
-                          BoxShape.circle,
-                        ),
-                        child:
-                        Container(
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          height: 50,
                           decoration:
                           const BoxDecoration(
                             color:
-                            payLensBlue,
-                            shape:
-                            BoxShape
-                                .circle,
+                            Colors.white,
+                            border:
+                            Border(
+                              top:
+                              BorderSide(
+                                color:
+                                Color(
+                                  0xFFE2E2E2,
+                                ),
+                              ),
+                            ),
                           ),
+                          child: Row(
+                            children: [
+                              _bottomItem(
+                                Icons
+                                    .home_rounded,
+                                'Home',
+                                0,
+                              ),
+
+                              _bottomItem(
+                                Icons
+                                    .subscriptions_rounded,
+                                'Subscriptions',
+                                1,
+                              ),
+
+                              // SPACE FOR PLUS
+                              const Expanded(
+                                child:
+                                SizedBox(),
+                              ),
+
+                              _bottomItem(
+                                Icons
+                                    .history_rounded,
+                                'History',
+                                2,
+                              ),
+
+                              _bottomItem(
+                                Icons
+                                    .person_outline_rounded,
+                                'Profile',
+                                3,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // ==========================================
+                      // PLUS BUTTON
+                      // ==========================================
+
+                      Positioned(
+                        right: 28,
+                        bottom: 54,
+                        child:
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(
+                              context,
+                            ).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                const UploadStatementScreen(),
+                              ),
+                            );
+                          },
+                          behavior:
+                          HitTestBehavior
+                              .opaque,
                           child:
-                          IconButton(
-                            onPressed:
-                            openUpload,
+                          Container(
+                            width: 56,
+                            height: 56,
                             padding:
-                            EdgeInsets.zero,
-                            icon:
-                            const Icon(
-                              Icons.add,
+                            const EdgeInsets
+                                .all(3),
+                            decoration:
+                            const BoxDecoration(
                               color:
                               Colors.white,
-                              size: 30,
+                              shape:
+                              BoxShape
+                                  .circle,
+                            ),
+                            child:
+                            Container(
+                              decoration:
+                              const BoxDecoration(
+                                color:
+                                payLensBlue,
+                                shape:
+                                BoxShape
+                                    .circle,
+                              ),
+                              child:
+                              const Center(
+                                child:
+                                Icon(
+                                  Icons.add,
+                                  color:
+                                  Colors.white,
+                                  size: 30,
+                                ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             );

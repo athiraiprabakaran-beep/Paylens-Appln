@@ -2,25 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:project/analyzing_payments_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'dashboard_screen.dart';
-import 'history_screen.dart';
+import 'audit_preferences_screen.dart';
 import 'notifications_screen.dart';
 import 'payment_methods_screen.dart';
-import 'audit_preferences_screen.dart';
-import 'upcoming_screen.dart';
 
-class ProfileSettingsScreen extends StatelessWidget {
+class ProfileSettingsScreen extends StatefulWidget {
   final String userName;
   final String userEmail;
 
   const ProfileSettingsScreen({
     super.key,
-    required this.userName,
-    required this.userEmail, required List<BankTransaction> payments,
+    this.userName = '',
+    this.userEmail = '', required List<BankTransaction> payments,
   });
 
+  @override
+  State<ProfileSettingsScreen> createState() =>
+      _ProfileSettingsScreenState();
+}
+
+class _ProfileSettingsScreenState
+    extends State<ProfileSettingsScreen> {
   // ============================================================
-  // PAYLENS COLORS
+  // COLORS
   // ============================================================
 
   static const Color primaryBlue =
@@ -33,6 +37,59 @@ class ProfileSettingsScreen extends StatelessWidget {
   Color(0xFFD0D0D0);
 
   // ============================================================
+  // CURRENT USER DATA
+  // ============================================================
+
+  String currentUserName = '';
+  String currentUserEmail = '';
+
+  bool isLoading = true;
+
+  // ============================================================
+  // INIT
+  // ============================================================
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loadCurrentUser();
+  }
+
+  // ============================================================
+  // LOAD CURRENT USER
+  // ============================================================
+
+  Future<void> _loadCurrentUser() async {
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    final savedName =
+    prefs.getString('paylens_user_name');
+
+    final savedEmail =
+    prefs.getString('paylens_user_email');
+
+    if (!mounted) return;
+
+    setState(() {
+      currentUserName =
+      (savedName != null &&
+          savedName.trim().isNotEmpty)
+          ? savedName.trim()
+          : widget.userName.trim();
+
+      currentUserEmail =
+      (savedEmail != null &&
+          savedEmail.trim().isNotEmpty)
+          ? savedEmail.trim()
+          : widget.userEmail.trim();
+
+      isLoading = false;
+    });
+  }
+
+  // ============================================================
   // SECTION TITLE
   // ============================================================
 
@@ -40,7 +97,7 @@ class ProfileSettingsScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(
         left: 2,
-        bottom: 5,
+        bottom: 6,
       ),
       child: Text(
         title.toUpperCase(),
@@ -69,7 +126,7 @@ class ProfileSettingsScreen extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: SizedBox(
-          height: 44,
+          height: 48,
           child: Row(
             children: [
               const SizedBox(width: 12),
@@ -103,7 +160,7 @@ class ProfileSettingsScreen extends StatelessWidget {
                   color: Color(0xFF777777),
                 ),
 
-              const SizedBox(width: 9),
+              const SizedBox(width: 10),
             ],
           ),
         ),
@@ -139,14 +196,26 @@ class ProfileSettingsScreen extends StatelessWidget {
   // ============================================================
 
   Widget profileCard() {
+    final String displayName =
+    currentUserName.trim().isNotEmpty
+        ? currentUserName.trim()
+        : 'User';
+
+    final String displayEmail =
+    currentUserEmail.trim().isNotEmpty
+        ? currentUserEmail.trim()
+        : 'No email available';
+
     final String profileLetter =
-    userName.trim().isNotEmpty
-        ? userName.trim().substring(0, 1).toUpperCase()
+    displayName != 'User'
+        ? displayName
+        .substring(0, 1)
+        .toUpperCase()
         : '?';
 
     return Container(
       width: double.infinity,
-      height: 74,
+      height: 76,
       padding: const EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 8,
@@ -155,14 +224,14 @@ class ProfileSettingsScreen extends StatelessWidget {
         color: Colors.white,
         border: Border.all(
           color: primaryBlue,
-          width: 1.5,
+          width: 2,
         ),
         borderRadius: BorderRadius.circular(7),
       ),
       child: Row(
         children: [
           // ======================================================
-          // AVATAR
+          // PROFILE LETTER
           // ======================================================
 
           Container(
@@ -170,15 +239,15 @@ class ProfileSettingsScreen extends StatelessWidget {
             height: 44,
             decoration: BoxDecoration(
               color: const Color(0xFFD8D3FF),
-              borderRadius: BorderRadius.circular(7),
+              borderRadius: BorderRadius.circular(6),
             ),
             child: Center(
               child: Text(
                 profileLetter,
                 style: const TextStyle(
                   fontFamily: 'Montserrat',
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 21,
+                  fontWeight: FontWeight.w500,
                   color: primaryBlue,
                 ),
               ),
@@ -188,7 +257,7 @@ class ProfileSettingsScreen extends StatelessWidget {
           const SizedBox(width: 11),
 
           // ======================================================
-          // USER INFO
+          // USER DETAILS
           // ======================================================
 
           Expanded(
@@ -199,9 +268,7 @@ class ProfileSettingsScreen extends StatelessWidget {
               CrossAxisAlignment.start,
               children: [
                 Text(
-                  userName.trim().isEmpty
-                      ? 'User'
-                      : userName,
+                  displayName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -215,7 +282,7 @@ class ProfileSettingsScreen extends StatelessWidget {
                 const SizedBox(height: 2),
 
                 Text(
-                  userEmail,
+                  displayEmail,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -233,14 +300,13 @@ class ProfileSettingsScreen extends StatelessWidget {
                     Container(
                       width: 6,
                       height: 6,
-                      decoration:
-                      const BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Color(0xFF39A845),
                         shape: BoxShape.circle,
                       ),
                     ),
 
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 4),
 
                     const Text(
                       'Account active',
@@ -293,27 +359,12 @@ class ProfileSettingsScreen extends StatelessWidget {
   // ============================================================
 
   void openAuditPreferences(
-      BuildContext context,
-      ) {
+      BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) =>
         const AuditPreferencesScreen(),
-      ),
-    );
-  }
-
-  // ============================================================
-  // UPCOMING
-  // ============================================================
-
-  void openUpcoming(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-        const UpcomingScreen(),
       ),
     );
   }
@@ -325,7 +376,7 @@ class ProfileSettingsScreen extends StatelessWidget {
   void openIssues(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) {
+      builder: (_) {
         return AlertDialog(
           title: const Row(
             children: [
@@ -338,20 +389,15 @@ class ProfileSettingsScreen extends StatelessWidget {
             ],
           ),
           content: const Text(
-            'PayLens will show subscription issues '
-                'and unusual recurring payment patterns here.',
+            'PayLens will show unusual or potentially '
+                'problematic subscription activity here.',
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(dialogContext);
+                Navigator.pop(context);
               },
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  color: primaryBlue,
-                ),
-              ),
+              child: const Text('OK'),
             ),
           ],
         );
@@ -366,12 +412,12 @@ class ProfileSettingsScreen extends StatelessWidget {
   void openReview(BuildContext context) {
     showDialog(
       context: context,
-      builder: (dialogContext) {
+      builder: (_) {
         return AlertDialog(
           title: const Row(
             children: [
               Icon(
-                Icons.star_outline_rounded,
+                Icons.star_border_rounded,
                 color: Colors.amber,
               ),
               SizedBox(width: 8),
@@ -379,20 +425,52 @@ class ProfileSettingsScreen extends StatelessWidget {
             ],
           ),
           content: const Text(
-            'Your PayLens review option will be '
-                'available here.',
+            'Review your detected subscriptions '
+                'and recurring payments here.',
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(dialogContext);
+                Navigator.pop(context);
               },
-              child: const Text(
-                'OK',
-                style: TextStyle(
-                  color: primaryBlue,
-                ),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ============================================================
+  // UPCOMING
+  // ============================================================
+
+  void openUpcoming(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(
+                Icons.calendar_month_outlined,
+                color: primaryBlue,
               ),
+              SizedBox(width: 8),
+              Text('Upcoming'),
+            ],
+          ),
+          content: const Text(
+            'Upcoming subscription renewals and '
+                'payments detected from your statements '
+                'will appear here.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
             ),
           ],
         );
@@ -404,29 +482,48 @@ class ProfileSettingsScreen extends StatelessWidget {
   // SIGN OUT
   // ============================================================
 
+  Future<void> signOut(BuildContext context) async {
+    final prefs =
+    await SharedPreferences.getInstance();
+
+    // ----------------------------------------------------------
+    // IMPORTANT
+    // ----------------------------------------------------------
+
+    await prefs.setBool(
+      'paylens_logged_in',
+      false,
+    );
+
+    // Do NOT delete user name/email here.
+    //
+    // Reason:
+    // Login screen will overwrite these values
+    // when another user logs in.
+    //
+    // This prevents Profile from becoming permanently
+    // blank before the next login.
+
+    if (!context.mounted) return;
+
+    Navigator.pushNamedAndRemoveUntil(
+      context,
+      '/login',
+          (route) => false,
+    );
+  }
+
+  // ============================================================
+  // SIGN OUT BUTTON
+  // ============================================================
+
   Widget signOutButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 42,
       child: ElevatedButton(
-        onPressed: () async {
-          final prefs =
-          await SharedPreferences.getInstance();
-
-          await prefs.setBool(
-            'paylens_logged_in',
-            false,
-          );
-
-          if (!context.mounted) {
-            return;
-          }
-
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/login',
-                (route) => false,
-          );
+        onPressed: () {
+          signOut(context);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor:
@@ -445,7 +542,7 @@ class ProfileSettingsScreen extends StatelessWidget {
           children: [
             Icon(
               Icons.logout_rounded,
-              size: 19,
+              size: 18,
               color: Color(0xFFD13F3F),
             ),
 
@@ -467,42 +564,11 @@ class ProfileSettingsScreen extends StatelessWidget {
   }
 
   // ============================================================
-  // HOME
-  // ============================================================
-
-  void openHome(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => DashboardScreen(
-          userName: userName,
-          userEmail: userEmail,
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // HISTORY
-  // ============================================================
-
-  void openHistory(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-        const HistoryScreen(),
-      ),
-    );
-  }
-
-  // ============================================================
   // BOTTOM NAVIGATION
   // ============================================================
 
   Widget bottomNavigation(
-      BuildContext context,
-      ) {
+      BuildContext context) {
     return Container(
       height: 58,
       decoration: const BoxDecoration(
@@ -518,13 +584,14 @@ class ProfileSettingsScreen extends StatelessWidget {
         mainAxisAlignment:
         MainAxisAlignment.spaceAround,
         children: [
-          // ======================================================
           // HOME
-          // ======================================================
-
           IconButton(
             onPressed: () {
-              openHome(context);
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/dashboard',
+                    (route) => false,
+              );
             },
             icon: const Icon(
               Icons.home_outlined,
@@ -533,10 +600,7 @@ class ProfileSettingsScreen extends StatelessWidget {
             ),
           ),
 
-          // ======================================================
-          // UPLOAD / SUBSCRIPTIONS
-          // ======================================================
-
+          // UPLOAD / STATEMENT
           IconButton(
             onPressed: () {
               Navigator.pushNamed(
@@ -551,13 +615,13 @@ class ProfileSettingsScreen extends StatelessWidget {
             ),
           ),
 
-          // ======================================================
           // HISTORY
-          // ======================================================
-
           IconButton(
             onPressed: () {
-              openHistory(context);
+              Navigator.pushNamed(
+                context,
+                '/history',
+              );
             },
             icon: const Icon(
               Icons.history_rounded,
@@ -566,10 +630,7 @@ class ProfileSettingsScreen extends StatelessWidget {
             ),
           ),
 
-          // ======================================================
-          // PROFILE - ACTIVE
-          // ======================================================
-
+          // PROFILE
           IconButton(
             onPressed: () {},
             icon: const Icon(
@@ -591,11 +652,6 @@ class ProfileSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: pageBackground,
-
-      // ========================================================
-      // BODY
-      // ========================================================
-
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -649,7 +705,7 @@ class ProfileSettingsScreen extends StatelessWidget {
 
                         SizedBox(
                           height:
-                          compact ? 8 : 10,
+                          compact ? 7 : 10,
                         ),
 
                         // ==========================================
@@ -663,8 +719,8 @@ class ProfileSettingsScreen extends StatelessWidget {
                         settingsCard(
                           children: [
                             settingsRow(
-                              icon:
-                              Icons.notifications_none_rounded,
+                              icon: Icons
+                                  .notifications_none_rounded,
                               title:
                               'Notifications',
                               onTap: () {
@@ -675,8 +731,8 @@ class ProfileSettingsScreen extends StatelessWidget {
                             ),
 
                             settingsRow(
-                              icon:
-                              Icons.credit_card_outlined,
+                              icon: Icons
+                                  .credit_card_outlined,
                               title:
                               'Payment Methods',
                               onTap: () {
@@ -687,8 +743,8 @@ class ProfileSettingsScreen extends StatelessWidget {
                             ),
 
                             settingsRow(
-                              icon:
-                              Icons.settings_outlined,
+                              icon: Icons
+                                  .settings_outlined,
                               title:
                               'Audit Preferences',
                               onTap: () {
@@ -702,7 +758,7 @@ class ProfileSettingsScreen extends StatelessWidget {
 
                         SizedBox(
                           height:
-                          compact ? 8 : 10,
+                          compact ? 7 : 10,
                         ),
 
                         // ==========================================
@@ -716,8 +772,8 @@ class ProfileSettingsScreen extends StatelessWidget {
                         settingsCard(
                           children: [
                             settingsRow(
-                              icon:
-                              Icons.warning_amber_outlined,
+                              icon: Icons
+                                  .warning_amber_outlined,
                               title: 'Issues',
                               onTap: () {
                                 openIssues(
@@ -727,8 +783,8 @@ class ProfileSettingsScreen extends StatelessWidget {
                             ),
 
                             settingsRow(
-                              icon:
-                              Icons.star_outline_rounded,
+                              icon: Icons
+                                  .star_border_rounded,
                               title: 'Review',
                               onTap: () {
                                 openReview(
@@ -738,8 +794,8 @@ class ProfileSettingsScreen extends StatelessWidget {
                             ),
 
                             settingsRow(
-                              icon:
-                              Icons.calendar_month_outlined,
+                              icon: Icons
+                                  .calendar_month_outlined,
                               title: 'Upcoming',
                               onTap: () {
                                 openUpcoming(
@@ -750,8 +806,9 @@ class ProfileSettingsScreen extends StatelessWidget {
                           ],
                         ),
 
-                        const SizedBox(
-                          height: 18,
+                        SizedBox(
+                          height:
+                          compact ? 14 : 20,
                         ),
 
                         // ==========================================
@@ -760,10 +817,6 @@ class ProfileSettingsScreen extends StatelessWidget {
 
                         signOutButton(
                           context,
-                        ),
-
-                        const SizedBox(
-                          height: 8,
                         ),
                       ],
                     ),
